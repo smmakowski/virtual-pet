@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
-// const sitePath = process.arg[2] || '.';
+// set port number
 const PORT  = process.env.PORT || 8000;
 
 const app = express();
@@ -11,8 +11,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// use folder f
 app.use(express.static(`${__dirname}/../`));
 
+// start server
 app.listen(PORT, () => {
   console.log(`Listening on 127.0.0.1:${PORT}`);
 });

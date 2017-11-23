@@ -1,23 +1,17 @@
-let game = new Phaser.Game(640, 360, Phaser.AUTO); // init new Game
-//create game state object
-let GameState = {
-  preload: preload,
-  create: create,
-  update: update,
+// game state object
+var GameState = {
+  preload: function() { // preload assets here
+    this.load.image('background', 'assets/images/sample-background.png');
+  },
+  create: function() { // create scene here
+    this.background = this.game.add.sprite(0, 0,'background');
+  },
+  update: function() { // update function
+
+  },
 };
 
-//game state methods
-function preload() {
+var game = new Phaser.Game(640, 360, Phaser.AUTO); // init new Game; pahser will automatically append a canvas
 
-}
-
-function create() {
-
-}
-
-function update() {
-
-}
-
-game.state.add('GameState', Gamestate); // add GameState
-game.state.start('GameState');
+game.state.add('GameState', GameState); // add GameState
+game.state.start('GameState'); // start game state
