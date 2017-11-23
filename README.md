@@ -1,3 +1,2 @@
-# Farm Animals
-This is my repository for 'Game #1: Farm Animals' from 'The Complete Mobile Game Development with Phaser'
-course
+# Phaser Starter
+This is a basic starter for phaser projects that uses a node/express server.
