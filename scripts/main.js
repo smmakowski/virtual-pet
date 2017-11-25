@@ -50,7 +50,7 @@ let GameState = {
     this.pet.customParams = {health: 100, fun: 100};
     this.pet.inputEnabled = true;
     this.pet.input.pixelPerfectClick = true;
-    this.pet.input.enableDrag(this.pickItem, this);
+    this.pet.input.enableDrag();
     this.pet.events.onInputDown.add(this.stopRotation,this);
 
     // create buttons
@@ -111,17 +111,24 @@ let GameState = {
       this.pet.angle += this.rotationDirection;
     }
     if (this.pet.customParams.health <= 0  || this.pet.customParams.fun <= 0) {
+      this.pet.input.disableDrag();
       this.uiBlocked = true;
       this.time.events.remove(self.agePet);
       this.stopRotation();
-
+      this.healthText.text = 'DEAD';
+      this.funText.text = 'DEAD';
+      this.healthText.style.fill = 'Red';
+      this.funText.style.fill = 'Red';
       this.pet.frame = 4;
+
       // let deathAnimation = this.pet.animations.add('die', [1, 2, 3, 2, 1], 7, false);
       //
       // deathAnimation.onComplete.add(function() {
       //   console.log('dead');
       // }, this);
       // deathAnimation.play('die');
+
+      this.game.time.events.add(2000, this.gameOver, this);
     }
   },
 
@@ -226,8 +233,10 @@ let GameState = {
       }
     }
     this.updateStats();
-
-  }
+  },
+  gameOver: function() {
+    this.game.state.restart();
+  },
 };
 
 let game = new Phaser.Game(360, 640, Phaser.AUTO); // init new Game; pahser will automatically append a canvas
