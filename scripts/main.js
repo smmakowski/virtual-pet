@@ -2,7 +2,7 @@
 var GameState = {
   //
   isRotating: false,
-  rotationDirection: 5,
+  rotationDirection: -5,
   uiBlocked: false,
   selectedItem: null,
   //methods
@@ -35,6 +35,11 @@ var GameState = {
     this.pet.customParams = {health: 100, fun: 100};
     this.pet.inputEnabled = true;
     this.pet.input.enableDrag(this.pickItem, this);
+    this.pet.events.onInputDown.add(function() {
+      self.rotate.alpha = 1;
+      self.isRotating = false;
+      self.pet.angle = 0;
+    });
 
     // create buttons
     this.apple = this.game.add.sprite(this.game.world.width * .125, 570, 'apple');
@@ -63,7 +68,14 @@ var GameState = {
     this.rotate.anchor.setTo(.5);
     this.rotate.inputEnabled = true;
     this.rotate.events.onInputDown.add(this.rotatePet, this);
-    this.rotate.events.onInputUp.add(this.revertSize, this);
+    this.rotate.events.onInputUp.add(function() {
+      if (self.rotationDirection === 5) {
+        self.rotate.scale.setTo(-1, 1);
+      } else {
+        self.rotate.scale.setTo(1);
+      }
+
+    }, this);
 
     this.buttons = [this.apple, this.candy, this.rubberDuck, this.rotate];
 
@@ -101,26 +113,22 @@ var GameState = {
   },
   rotatePet: function(sprite, event) {
     if (!this.uiBlocked) {
+      this.clearSelection();
       sprite.scale.setTo(.8);
       sprite.alpha = .4;
-      if (this.isRotating) {
-        this.pet.angle = 0;
-        sprite.alpha = 1;
-        this.isRotating = false;
-      } else {
-        const rand = Math.floor(Math.random() * 2);
-        if (rand === 0) {
-          this.rotationDirection = 5;
-        } else {
-          this.rotationDirection = -5;
-        }
-        this.isRotating = true;
-      }
+
+      this.rotationDirection *= -1;
+      this.isRotating = true;
     }
+  },
+
+  stopRotation: function() {
+
   },
 
   dropItem: function(sprite, event) {
     const self = this;
+    this.isRotating = false;
     if (this.selectedItem && !this.uiBlocked) {
       this.uiBlocked = true;
       const x = event.x;
@@ -128,14 +136,14 @@ var GameState = {
       let newItem = this.game.add.sprite(x, y, this.selectedItem.key);
       newItem.anchor.setTo(.5);
 
-      let eatingAnimation = this.pet.animations.add('eat', [0,1,2,1,0,1,2,3,2,1,0], 3, false);
+      let eatingAnimation = this.pet.animations.add('eat', [1, 2, 3, 2, 1], 7, false);
       eatingAnimation.onComplete.add(function() {
         newItem.destroy();
         self.uiBlocked = false;
       }, this);
 
       let petMovement = this.add.tween(self.pet);
-      petMovement.to({x: x, y, y}, 1000);
+      petMovement.to({x: x, y, y}, 700);
 
       petMovement.onComplete.add(function() {
         eatingAnimation.play('eat');
