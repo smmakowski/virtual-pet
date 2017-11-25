@@ -3,6 +3,8 @@ var GameState = {
   //
   isRotating: false,
   rotationDirection: 5,
+  uiBlocked: false,
+  selectedItem: null,
   //methods
   init: function() {
     this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
@@ -21,8 +23,11 @@ var GameState = {
     this.load.spritesheet('pet', 'assets/images/pet.png', 97, 83, 5, 1, 1);
   },
   create: function() { // create scene here
+    const self = this;
     // add background
     this.background = this.game.add.sprite(0, 0,'backyard');
+    this.background.inputEnabled = true;
+    this.background.events.onInputDown.add(this.dropItem,this);
 
     // add pet
     this.pet = this.game.add.sprite(this.game.world.centerX, this.game.world.height * .6, 'pet');
@@ -60,54 +65,97 @@ var GameState = {
     this.rotate.events.onInputDown.add(this.rotatePet, this);
     this.rotate.events.onInputUp.add(this.revertSize, this);
 
+    this.buttons = [this.apple, this.candy, this.rubberDuck, this.rotate];
+
     // add text
   },
   update: function() { // update function
     if (this.isRotating) {
       this.pet.angle += this.rotationDirection;
     }
-    if (this.pet.customParams.health <= 0) {
-      console.log('FUCK YOU YOU KILLED ME YOU BASTARD');
-    }
   },
 
   pickItem: function(sprite, event) {
-    const self = this;
-    sprite.scale.setTo(.8);
-    if (sprite.customParams.health) {
-      if (this.pet.customParams.health + sprite.customParams.health > 100) {
-        this.pet.customParams.health = 100;
-      } else {
-        this.pet.customParams.health += sprite.customParams.health;
+    if (!this.uiBlocked) {
+      const self = this;
+      sprite.scale.setTo(.8);
+      this.clearSelection();
+      sprite.alpha = .4;
+      this.selectedItem = sprite;
+      if (sprite.customParams.health) {
+        if (this.pet.customParams.health + sprite.customParams.health > 100) {
+          this.pet.customParams.health = 100;
+        } else {
+          this.pet.customParams.health += sprite.customParams.health;
+        }
       }
-    }
-    if (sprite.customParams.fun) {
-      if (this.pet.customParams.fun + sprite.customParams.fun > 100) {
-        this.pet.customParams.fun = 100;
-      } else {
-        this.pet.customParams.fun += sprite.customParams.fun;
+      if (sprite.customParams.fun) {
+        if (this.pet.customParams.fun + sprite.customParams.fun > 100) {
+          this.pet.customParams.fun = 100;
+        } else {
+          this.pet.customParams.fun += sprite.customParams.fun;
+        }
       }
+      console.log(self.pet.customParams.health);
     }
-    console.log(self.pet.customParams.health);
   },
   rotatePet: function(sprite, event) {
-    sprite.scale.setTo(.8);
-    if (this.isRotating) {
-      this.pet.angle = 0;
-      this.isRotating = false;
-    } else {
-      const rand = Math.floor(Math.random() * 2);
-      if (rand === 0) {
-        this.rotationDirection = 5;
+    if (!this.uiBlocked) {
+      sprite.scale.setTo(.8);
+      sprite.alpha = .4;
+      if (this.isRotating) {
+        this.pet.angle = 0;
+        sprite.alpha = 1;
+        this.isRotating = false;
       } else {
-        this.rotationDirection = -5;
+        const rand = Math.floor(Math.random() * 2);
+        if (rand === 0) {
+          this.rotationDirection = 5;
+        } else {
+          this.rotationDirection = -5;
+        }
+        this.isRotating = true;
       }
-      this.isRotating = true;
     }
   },
+
+  dropItem: function(sprite, event) {
+    const self = this;
+    if (this.selectedItem && !this.uiBlocked) {
+      this.uiBlocked = true;
+      const x = event.x;
+      const y = event.y;
+      let newItem = this.game.add.sprite(x, y, this.selectedItem.key);
+      newItem.anchor.setTo(.5);
+
+      let eatingAnimation = this.pet.animations.add('eat', [0,1,2,1,0,1,2,3,2,1,0], 3, false);
+      eatingAnimation.onComplete.add(function() {
+        newItem.destroy();
+        self.uiBlocked = false;
+      }, this);
+
+      let petMovement = this.add.tween(self.pet);
+      petMovement.to({x: x, y, y}, 1000);
+
+      petMovement.onComplete.add(function() {
+        eatingAnimation.play('eat');
+      });
+
+
+
+      petMovement.start();
+    }
+  },
+  clearSelection: function() {
+    this.buttons.forEach(function(button) {
+      button.alpha = 1;
+    });
+    this.selectedItem = null;
+  },
+
   revertSize: function(sprite, event) {
     sprite.scale.setTo(1);
-  }
+  },
 };
 
 let game = new Phaser.Game(360, 640, Phaser.AUTO); // init new Game; pahser will automatically append a canvas
