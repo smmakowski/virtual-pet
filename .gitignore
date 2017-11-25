@@ -6,3 +6,6 @@ bower_components/
 # file system settings
 
 .DS_Store
+
+# debug logs
+npm-debug.log
