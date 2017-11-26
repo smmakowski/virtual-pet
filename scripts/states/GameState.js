@@ -1,17 +1,3 @@
-const headerStyle = {
-  font: '30px  Impact',
-  fill: 'black',
-};
-
-const normalTextStyle = {
-  font: '25px  Impact',
-  fill: 'Gray',
-};
-const lowTextStyle = {
-  font: '25px  Impact',
-  fill: 'Red',
-};
-
 //game state object
 let GameState = {
   //
@@ -20,22 +6,6 @@ let GameState = {
   uiBlocked: false,
   selectedItem: null,
   //methods
-  init: function() {
-    this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-    this.scale.pageAlignVertically = true;
-    this.scale.pageAlignhorizontally = true;
-  },
-  preload: function() { // preload assets here
-    this.load.image('backyard', 'assets/images/backyard.png');
-    this.load.image('apple', 'assets/images/apple.png');
-    this.load.image('arrow', 'assets/images/arrow.png');
-    this.load.image('bar', 'assets/images/bar.png');
-    this.load.image('candy', 'assets/images/candy.png');
-    this.load.image('logo', 'assets/images/logo.png');
-    this.load.image('rotate', 'assets/images/rotate.png');
-    this.load.image('rubberDuck', 'assets/images/rubber_duck.png');
-    this.load.spritesheet('pet', 'assets/images/pet.png', 97, 83, 5, 1, 1);
-  },
   create: function() { // create scene here
     const self = this;
     // add background
@@ -101,7 +71,7 @@ let GameState = {
 
     this.updateStats();
 
-    this.agePet = this.game.time.events.loop(Phaser.Timer.SECOND * 1, this.decreaseStats, this);
+    this.agePet = this.game.time.events.loop(Phaser.Timer.SECOND * 5, this.decreaseStats, this);
 
   },
   update: function() { // update function
@@ -235,6 +205,6 @@ let GameState = {
   },
   gameOver: function() {
     this.uiBlocked = false;
-    this.game.state.restart();
+    this.game.state.start('HomeState', true, false, 'GAME OVER!');
   },
 };
